@@ -216,4 +216,4 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
           publish_dir: ./deploy_temp
-          commit_message: "Update version info
+          commit_message: "Update version info"
