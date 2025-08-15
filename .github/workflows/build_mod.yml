@@ -165,3 +165,29 @@ jobs:
           
             Write-Error "File not found: $filePath"
           }
+
+      - name: Create version.json
+        shell: pwsh
+        run: |
+          $filePath = "Builds/MapsNotIncluded_WorldParser/MapsNotIncluded_WorldParser.dll"
+          if (Test-Path -Path $filePath) {
+            $checksum = (Get-FileHash -Path $filePath -Algorithm SHA256 | Select-Object -ExpandProperty Hash).ToLower()
+            $modVersion = (Get-Content "./BuildsZipped/_ReleaseVersionInfoData.json" | ConvertFrom-Json).mods[0].version
+            $json = @{
+              version = $modVersion
+              checksum = $checksum
+              commit = "${{ env.SHORT_COMMIT }}"
+            } | ConvertTo-Json -Compress
+            Set-Content -Path version.json -Value $json -Encoding UTF8
+          } else {
+            Write-Error "File not found: $filePath"
+          }
+
+      - name: Deploy version.json to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: .
+          keep_files: true
+          commit_message: "Update version.json for ${{ env.SHORT_COMMIT }}"
