@@ -184,30 +184,16 @@ jobs:
             Write-Error "File not found: $filePath"
           }
 
-      - name: Ensure gh-pages branch exists
-        shell: bash
+      - name: Prepare deployment artifacts
         run: |
-          git fetch origin
-          if ! git show-ref --verify --quiet refs/remotes/origin/gh-pages; then
-            echo "Creating gh-pages branch..."
-            git checkout --orphan gh-pages
-            rm -rf ./*
-            echo '{}' > .placeholder
-            git add .placeholder
-            git config user.name "github-actions[bot]"
-            git config user.email "github-actions[bot]@users.noreply.github.com"
-            git commit -m "Initial gh-pages branch"
-            git push origin gh-pages
-            git checkout main
-          else
-            echo "gh-pages branch already exists."
-          fi
+          mkdir -p ../deploy_temp
+          mv version.json ../deploy_temp/
+        shell: bash
 
       - name: Deploy version.json to gh-pages
-        shell: bash
-        run: |
-          git fetch origin
-          git checkout gh-pages
-          git add version.json
-          git commit -m "Update version.json for ${{ env.SHORT_COMMIT }}" || echo "No changes"
-          git push origin gh-pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: ./deploy_temp
+          commit_message: "Update version.json for ${{ env.SHORT_COMMIT }}"
