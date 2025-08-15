@@ -142,6 +142,7 @@ jobs:
 
       - name: Compute SHA-256 checksum and send to server
         shell: powershell
+        if: false
         env:
           API_KEY: ${{ secrets.DATABASE_EXPORT_API_KEY }}
         run: |
